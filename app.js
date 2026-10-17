@@ -9,6 +9,10 @@ const elements = {
   connectionText: document.querySelector("#connectionText"),
   lux: document.querySelector("#luxValue"),
   description: document.querySelector("#lightDescription"),
+  soilPercent: document.querySelector("#soilPercent"),
+  soilRaw: document.querySelector("#soilRaw"),
+  soilDescription: document.querySelector("#soilDescription"),
+  moistureFill: document.querySelector("#moistureFill"),
   lastSeen: document.querySelector("#lastSeen"),
   rssi: document.querySelector("#rssiValue"),
   uptime: document.querySelector("#uptimeValue"),
@@ -37,6 +41,14 @@ function describeLux(lux) {
   return "강한 햇빛 수준이에요";
 }
 
+function describeSoil(percent) {
+  if (percent < 20) return "매우 건조해요 · 물을 확인하세요";
+  if (percent < 40) return "조금 건조한 상태예요";
+  if (percent < 70) return "적당한 수분 상태예요";
+  if (percent < 90) return "충분히 촉촉해요";
+  return "수분이 매우 많아요";
+}
+
 function formatUptime(seconds) {
   if (!Number.isFinite(seconds)) return "--";
   const days = Math.floor(seconds / 86400);
@@ -56,6 +68,18 @@ function updateReading(payload) {
     maximumFractionDigits: 1,
   });
   elements.description.textContent = describeLux(lux);
+
+  const soilRaw = Number(payload.soilRaw);
+  const soilPercent = Number(payload.soilPercent);
+  if (Number.isFinite(soilRaw) && Number.isFinite(soilPercent)) {
+    const boundedPercent = Math.min(100, Math.max(0, soilPercent));
+    elements.soilRaw.textContent = Math.round(soilRaw).toLocaleString("ko-KR");
+    elements.soilPercent.textContent = boundedPercent.toLocaleString("ko-KR", {
+      maximumFractionDigits: 1,
+    });
+    elements.soilDescription.textContent = describeSoil(boundedPercent);
+    elements.moistureFill.style.width = `${boundedPercent}%`;
+  }
   elements.rssi.textContent = Number.isFinite(Number(payload.rssi))
     ? `${payload.rssi} dBm`
     : "--";

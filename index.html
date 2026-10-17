@@ -8,18 +8,18 @@
       name="description"
       content="ESP32와 BH1750 센서가 측정한 실시간 조도를 확인하는 대시보드"
     />
-    <title>내 조도 센서</title>
+    <title>내 식물 센서</title>
     <link rel="preconnect" href="https://unpkg.com" />
-    <link rel="stylesheet" href="style.css?v=3" />
+    <link rel="stylesheet" href="style.css?v=4" />
     <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script defer src="app.js?v=3"></script>
+    <script defer src="app.js?v=4"></script>
   </head>
   <body>
     <main class="dashboard">
       <header class="topbar">
         <div>
-          <p class="eyebrow">ESP32 · BH1750</p>
-          <h1>내 조도 센서</h1>
+          <p class="eyebrow">ESP32 · BH1750 · SEN0114</p>
+          <h1>내 식물 센서</h1>
         </div>
         <div class="connection" id="connection" data-state="connecting">
           <span class="connection-dot" aria-hidden="true"></span>
@@ -38,6 +38,26 @@
             <span>lux</span>
           </div>
           <p class="description" id="lightDescription">센서 값을 기다리고 있어요</p>
+        </div>
+      </section>
+
+      <section class="soil-card" aria-labelledby="soil-title">
+        <div class="soil-heading">
+          <div>
+            <p class="eyebrow">SEN0114</p>
+            <h2 id="soil-title">토양 수분</h2>
+          </div>
+          <div class="soil-value-row">
+            <strong id="soilPercent">--</strong>
+            <span>%</span>
+          </div>
+        </div>
+        <div class="moisture-track" aria-hidden="true">
+          <span id="moistureFill"></span>
+        </div>
+        <div class="soil-footer">
+          <span id="soilDescription">센서 값을 기다리고 있어요</span>
+          <span>원시값 <strong id="soilRaw">--</strong> / 2670</span>
         </div>
       </section>
 

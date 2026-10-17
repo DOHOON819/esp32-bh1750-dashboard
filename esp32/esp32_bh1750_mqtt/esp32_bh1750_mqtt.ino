@@ -6,7 +6,12 @@
 
 constexpr int SDA_PIN = 21;
 constexpr int SCL_PIN = 22;
+constexpr int SOIL_PIN = 34;
 constexpr uint8_t BH1750_ADDRESS = 0x23;
+
+// SEN0114 calibration values supplied for this sensor.
+constexpr int SOIL_DRY_RAW = 0;
+constexpr int SOIL_WET_RAW = 2670;
 
 const char* MQTT_HOST = "broker.emqx.io";
 constexpr uint16_t MQTT_PORT = 1883;
@@ -80,12 +85,30 @@ void publishReading() {
     return;
   }
 
-  char payload[128];
+  // Average several ADC readings to reduce noise from the resistive sensor.
+  uint32_t soilSum = 0;
+  constexpr int SOIL_SAMPLES = 10;
+  for (int i = 0; i < SOIL_SAMPLES; ++i) {
+    soilSum += analogRead(SOIL_PIN);
+    delay(5);
+  }
+  const int soilRaw = soilSum / SOIL_SAMPLES;
+  const float soilPercent = constrain(
+      (soilRaw - SOIL_DRY_RAW) * 100.0f /
+          (SOIL_WET_RAW - SOIL_DRY_RAW),
+      0.0f,
+      100.0f
+  );
+
+  char payload[192];
   snprintf(
       payload,
       sizeof(payload),
-      "{\"lux\":%.1f,\"rssi\":%d,\"uptime\":%lu}",
+      "{\"lux\":%.1f,\"soilRaw\":%d,\"soilPercent\":%.1f,"
+      "\"rssi\":%d,\"uptime\":%lu}",
       lux,
+      soilRaw,
+      soilPercent,
       WiFi.RSSI(),
       millis() / 1000UL
   );
@@ -104,6 +127,8 @@ void setup() {
 
   Wire.begin(SDA_PIN, SCL_PIN);
   Wire.setClock(100000);
+  analogReadResolution(12);
+  analogSetPinAttenuation(SOIL_PIN, ADC_11db);
 
   if (!lightMeter.begin(
           BH1750::CONTINUOUS_HIGH_RES_MODE,

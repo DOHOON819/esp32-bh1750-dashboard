@@ -98,12 +98,75 @@ h2 {
 }
 
 .hero-card,
+.soil-card,
 .chart-card,
 .stat-card {
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(13, 38, 29, 0.72);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(18px);
+}
+
+.soil-card {
+  margin-top: 12px;
+  padding: 25px 28px;
+  border-radius: 24px;
+}
+
+.soil-heading,
+.soil-value-row,
+.soil-footer {
+  display: flex;
+  align-items: center;
+}
+
+.soil-heading,
+.soil-footer {
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.soil-value-row {
+  align-items: baseline;
+  gap: 5px;
+}
+
+.soil-value-row strong {
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.soil-value-row span {
+  color: #63d8ff;
+  font-weight: 800;
+}
+
+.moisture-track {
+  overflow: hidden;
+  height: 11px;
+  margin: 22px 0 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.moisture-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #54e6a0, #55cfff);
+  box-shadow: 0 0 16px rgba(85, 207, 255, 0.55);
+  transition: width 500ms ease;
+}
+
+.soil-footer {
+  color: #8ea49a;
+  font-size: 0.75rem;
+}
+
+.soil-footer strong {
+  color: #dceae3;
 }
 
 .hero-card {
@@ -313,6 +376,12 @@ footer button:hover {
 
   .stats {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .soil-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
   }
 
   .stat-card:first-child {
