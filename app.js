@@ -145,7 +145,14 @@ function connect() {
 
   client.on("connect", () => {
     setConnection("connecting", "센서 확인 중");
-    client.subscribe([DATA_TOPIC, STATUS_TOPIC]);
+    client.subscribe(`${TOPIC_ROOT}/#`, { qos: 0 }, (error) => {
+      if (error) {
+        console.error("MQTT 구독 오류", error);
+        setConnection("offline", "구독 오류");
+      } else {
+        console.info("MQTT 구독 완료", `${TOPIC_ROOT}/#`);
+      }
+    });
   });
 
   client.on("message", (topic, message) => {

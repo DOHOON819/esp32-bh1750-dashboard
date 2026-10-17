@@ -260,6 +260,10 @@ h2 {
   font-size: 0.82rem;
 }
 
+.chart-empty[hidden] {
+  display: none;
+}
+
 .chart-scale {
   display: flex;
   justify-content: space-between;
@@ -319,4 +323,3 @@ footer button:hover {
 @media (prefers-reduced-motion: reduce) {
   .orb::after { animation: none; }
 }
-
