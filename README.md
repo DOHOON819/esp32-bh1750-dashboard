@@ -13,9 +13,9 @@ ESP32 보드 패키지는 `esp32 by Espressif Systems`를 사용합니다.
 
 ## ESP32 설정
 
-1. `esp32/secrets.example.h`를 `esp32/secrets.h`로 복사합니다.
+1. `esp32/esp32_bh1750_mqtt/secrets.example.h`를 같은 폴더의 `secrets.h`로 복사합니다.
 2. `secrets.h`에 Wi-Fi 이름과 비밀번호를 입력합니다.
-3. `esp32/esp32_bh1750_mqtt.ino`를 Arduino IDE에서 엽니다.
+3. `esp32/esp32_bh1750_mqtt/esp32_bh1750_mqtt.ino`를 Arduino IDE에서 엽니다.
 4. 보드와 포트를 선택하고 업로드합니다.
 5. 시리얼 모니터를 115200 baud로 열어 연결 및 전송 로그를 확인합니다.
 
