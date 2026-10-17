@@ -1,4 +1,4 @@
-const BROKER_URL = "wss://broker.hivemq.com:8884/mqtt";
+const BROKER_URL = "wss://broker.emqx.io:8084/mqtt";
 const TOPIC_ROOT = "dohoon819/esp32-light/04fa372de25d455cb9cbfb965edd2193";
 const DATA_TOPIC = `${TOPIC_ROOT}/data`;
 const STATUS_TOPIC = `${TOPIC_ROOT}/status`;
@@ -167,11 +167,13 @@ function connect() {
 
   client.on("reconnect", () => setConnection("connecting", "재연결 중"));
   client.on("offline", () => setConnection("offline", "네트워크 끊김"));
-  client.on("error", () => setConnection("offline", "연결 오류"));
+  client.on("error", (error) => {
+    console.error("MQTT 연결 오류", error);
+    setConnection("offline", "연결 오류");
+  });
 }
 
 elements.reconnect.addEventListener("click", connect);
 window.addEventListener("resize", drawChart);
 setInterval(updateLastSeen, 1000);
 connect();
-

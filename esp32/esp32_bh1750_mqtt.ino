@@ -8,7 +8,7 @@ constexpr int SDA_PIN = 21;
 constexpr int SCL_PIN = 22;
 constexpr uint8_t BH1750_ADDRESS = 0x23;
 
-const char* MQTT_HOST = "broker.hivemq.com";
+const char* MQTT_HOST = "broker.emqx.io";
 constexpr uint16_t MQTT_PORT = 1883;
 const char* MQTT_TOPIC_DATA =
     "dohoon819/esp32-light/04fa372de25d455cb9cbfb965edd2193/data";
@@ -135,4 +135,3 @@ void loop() {
 
   delay(10);
 }
-
