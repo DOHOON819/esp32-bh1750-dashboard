@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#081c15" />
+    <meta
+      name="description"
+      content="ESP32와 BH1750 센서가 측정한 실시간 조도를 확인하는 대시보드"
+    />
+    <title>내 조도 센서</title>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ESP32 · BH1750</p>
+          <h1>내 조도 센서</h1>
+        </div>
+        <div class="connection" id="connection" data-state="connecting">
+          <span class="connection-dot" aria-hidden="true"></span>
+          <span id="connectionText">연결 중</span>
+        </div>
+      </header>
+
+      <section class="hero-card" aria-labelledby="current-title">
+        <div class="orb" aria-hidden="true">
+          <span class="orb-core"></span>
+        </div>
+        <div class="reading">
+          <p id="current-title">현재 밝기</p>
+          <div class="value-row">
+            <strong id="luxValue">--</strong>
+            <span>lux</span>
+          </div>
+          <p class="description" id="lightDescription">센서 값을 기다리고 있어요</p>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="센서 상태">
+        <article class="stat-card">
+          <p>마지막 수신</p>
+          <strong id="lastSeen">--</strong>
+        </article>
+        <article class="stat-card">
+          <p>Wi-Fi 신호</p>
+          <strong id="rssiValue">--</strong>
+        </article>
+        <article class="stat-card">
+          <p>ESP32 가동 시간</p>
+          <strong id="uptimeValue">--</strong>
+        </article>
+      </section>
+
+      <section class="chart-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">LIVE</p>
+            <h2>최근 측정값</h2>
+          </div>
+          <span>최근 30개</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="luxChart" aria-label="최근 조도 변화 그래프"></canvas>
+          <p class="chart-empty" id="chartEmpty">첫 측정값을 기다리는 중입니다</p>
+        </div>
+        <div class="chart-scale">
+          <span id="chartMin">0 lux</span>
+          <span id="chartMax">0 lux</span>
+        </div>
+      </section>
+
+      <footer>
+        <span>5초마다 자동 갱신</span>
+        <button type="button" id="reconnectButton">다시 연결</button>
+      </footer>
+    </main>
+  </body>
+</html>
+
