@@ -97,6 +97,50 @@ h2 {
   box-shadow: 0 0 14px rgba(255, 107, 107, 0.7);
 }
 
+.water-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(13, 38, 29, 0.72);
+  color: #b7c8bf;
+}
+
+.water-status h2 {
+  font-size: 1rem;
+}
+
+.water-status p {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.water-indicator {
+  flex: 0 0 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #8ea49a;
+}
+
+.water-status[data-state="empty"] {
+  border-color: rgba(255, 165, 94, 0.55);
+  background: rgba(96, 41, 18, 0.5);
+  color: #ffe1bd;
+}
+
+.water-status[data-state="empty"] .water-indicator {
+  background: #ffad69;
+}
+
+.water-status[data-state="ok"] .water-indicator {
+  background: #56f29b;
+}
+
 .hero-card,
 .soil-card,
 .chart-card,

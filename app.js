@@ -21,6 +21,9 @@ const elements = {
   chartMin: document.querySelector("#chartMin"),
   chartMax: document.querySelector("#chartMax"),
   reconnect: document.querySelector("#reconnectButton"),
+  waterStatus: document.querySelector("#waterStatus"),
+  waterTitle: document.querySelector("#waterTitle"),
+  waterDescription: document.querySelector("#waterDescription"),
 };
 
 let client;
@@ -59,42 +62,89 @@ function formatUptime(seconds) {
   return `${minutes}분`;
 }
 
+function sensorNumber(value) {
+  if (value === null || value === undefined || value === "" || typeof value === "boolean") {
+    return NaN;
+  }
+  return Number(value);
+}
+
+function updateWaterStatus(payload) {
+  if (typeof payload.waterEmpty !== "boolean") {
+    elements.waterStatus.dataset.state = "unknown";
+    elements.waterTitle.textContent = "물통 상태 확인 중";
+    elements.waterDescription.textContent = "수위 정보가 아직 도착하지 않았어요";
+    return;
+  }
+  elements.waterStatus.dataset.state = payload.waterEmpty ? "empty" : "ok";
+  elements.waterTitle.textContent = payload.waterEmpty
+    ? "물이 부족합니다"
+    : "물통에 물이 있어요";
+  elements.waterDescription.textContent = payload.waterEmpty
+    ? "물통을 채워주세요. 자동 급수와 센서 측정을 멈췄어요."
+    : "수위가 확인됐어요. 물 부족 경고가 해제됐습니다.";
+}
+
 function updateReading(payload) {
-  const lux = Number(payload.lux);
-  if (!Number.isFinite(lux) || lux < 0) return;
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
 
   lastMessageAt = Date.now();
-  elements.lux.textContent = lux.toLocaleString("ko-KR", {
-    maximumFractionDigits: 1,
-  });
-  elements.description.textContent = describeLux(lux);
+  updateWaterStatus(payload);
 
-  const soilRaw = Number(payload.soilRaw);
-  const soilPercent = Number(payload.soilPercent);
+  // 조도 오류가 있어도 토양 수분과 물통 상태는 계속 표시한다.
+  const lux = sensorNumber(payload.lux);
+  if (Number.isFinite(lux) && lux >= 0) {
+    elements.lux.textContent = lux.toLocaleString("ko-KR", {
+      maximumFractionDigits: 1,
+    });
+    elements.description.textContent = describeLux(lux);
+    readings.push(lux);
+    if (readings.length > MAX_POINTS) readings.shift();
+    drawChart();
+  } else {
+    elements.lux.textContent = "--";
+    elements.description.textContent = payload.waterEmpty
+      ? "물 부족으로 측정을 멈췄어요"
+      : "조도 센서 연결을 확인해주세요";
+  }
+
+  const soilRaw = sensorNumber(payload.soilRaw);
+  const soilPercent = sensorNumber(payload.soilPercent);
   if (Number.isFinite(soilRaw) && Number.isFinite(soilPercent)) {
     const boundedPercent = Math.min(100, Math.max(0, soilPercent));
     elements.soilRaw.textContent = Math.round(soilRaw).toLocaleString("ko-KR");
     elements.soilPercent.textContent = boundedPercent.toLocaleString("ko-KR", {
       maximumFractionDigits: 1,
     });
-    elements.soilDescription.textContent = describeSoil(boundedPercent);
+    elements.soilDescription.textContent = payload.soilSensorError
+      ? "수분 센서 오류 · 자동 급수를 멈췄어요"
+      : payload.soilStale || payload.waterEmpty
+        ? "측정 중단 전 마지막 수분 값이에요"
+        : describeSoil(boundedPercent);
     elements.moistureFill.style.width = `${boundedPercent}%`;
+  } else {
+    elements.soilRaw.textContent = "--";
+    elements.soilPercent.textContent = "--";
+    elements.moistureFill.style.width = "0%";
+    elements.soilDescription.textContent = payload.waterEmpty
+      ? "물 부족으로 측정을 멈췄어요"
+      : "수분 센서 값을 기다리고 있어요";
   }
-  elements.rssi.textContent = Number.isFinite(Number(payload.rssi))
+  elements.rssi.textContent = Number.isFinite(sensorNumber(payload.rssi))
     ? `${payload.rssi} dBm`
     : "--";
-  elements.uptime.textContent = formatUptime(Number(payload.uptime));
-
-  readings.push(lux);
-  if (readings.length > MAX_POINTS) readings.shift();
-  drawChart();
+  elements.uptime.textContent = formatUptime(sensorNumber(payload.uptime));
   updateLastSeen();
+  return true;
 }
 
 function updateLastSeen() {
   if (!lastMessageAt) return;
   const seconds = Math.floor((Date.now() - lastMessageAt) / 1000);
   elements.lastSeen.textContent = seconds < 5 ? "방금 전" : `${seconds}초 전`;
+  if (seconds > 20 && elements.connection.dataset.state !== "offline") {
+    setConnection("offline", "센서 응답 없음");
+  }
 }
 
 function drawChart() {
@@ -182,14 +232,20 @@ function connect() {
   client.on("message", (topic, message) => {
     const text = message.toString();
     if (topic === STATUS_TOPIC) {
-      setConnection(text === "online" ? "online" : "offline", text === "online" ? "센서 연결됨" : "센서 꺼짐");
+      if (text === "online") {
+        const recent = lastMessageAt && Date.now() - lastMessageAt <= 20000;
+        setConnection(recent ? "online" : "connecting", recent ? "센서 연결됨" : "센서 데이터 대기");
+      } else {
+        setConnection("offline", "센서 꺼짐");
+      }
       return;
     }
 
     if (topic === DATA_TOPIC) {
       try {
-        updateReading(JSON.parse(text));
-        setConnection("online", "센서 연결됨");
+        if (updateReading(JSON.parse(text))) {
+          setConnection("online", "센서 연결됨");
+        }
       } catch (error) {
         console.error("센서 데이터 형식 오류", error);
       }
